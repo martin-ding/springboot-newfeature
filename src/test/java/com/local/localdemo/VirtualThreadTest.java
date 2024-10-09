@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class VirtualThreadTest {
     static List<Integer> list = new ArrayList<>();
     public static void main(String[] args) {
-        // 开启线程 统计平台线程数
+        // start a new thread for statistics
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
@@ -22,14 +22,14 @@ public class VirtualThreadTest {
         }, 10, 10, TimeUnit.MILLISECONDS);
 
         long start = System.currentTimeMillis();
-        // 虚拟线程池
+        // Virtual Thread Pool
 //        ExecutorService executor =  Executors.newVirtualThreadPerTaskExecutor();
-        // 使用平台线程池
+        //Platform Thread Pool
          ExecutorService executor =  Executors.newFixedThreadPool(2000);
         for (int i = 0; i < 10000; i++) {
             executor.submit(() -> {
                 try {
-                    // 线程睡眠 0.5 s，模拟业务处理
+                    // sleep 0.5 s，to simulate IO processing
                     TimeUnit.MILLISECONDS.sleep(500);
                 } catch (InterruptedException ignored) {
                 }
@@ -41,7 +41,7 @@ public class VirtualThreadTest {
 
 
     }
-    // 更新创建的平台最大线程数
+    // update current Platform Thread number
     private static void updateMaxThreadNum(int num) {
         if (list.isEmpty()) {
             list.add(num);
