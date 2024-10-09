@@ -12,7 +12,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleError(Exception ex) {
-        // 在这里记录异常和 Correlation ID
+        // recording exception and  Correlation ID
         System.err.println("Error occurred: " + ex.getMessage() + ", Correlation ID: " + MDC.get("correlationId"));
     }
 }

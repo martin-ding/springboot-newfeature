@@ -1,8 +1,19 @@
 package com.local.localdemo;
 
+import org.apache.hc.client5.http.impl.NoopUserTokenHandler;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -51,6 +62,27 @@ public class VirtualThreadTest {
                 list.add(0, num);
             }
         }
+    }
+    @Bean
+    public RestTemplate restTemplate() throws Exception {
+        // create SSLContext
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        // load keystore
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(getClass().getClassLoader().getResourceAsStream("myapp.p12"), "mypassword".toCharArray());
+        // set TrustManager
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        trustManagerFactory.init(keyStore);
+        TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+        sslContext.init(null, trustManagers, null);
+
+        //create HttpClient
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
+                .setSSLHostnameVerifier(NoopUserTokenHandler.INSTANCE)// ignore host name ,only for test/local
+                .build();
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+
+        return new RestTemplate(factory);
     }
 }
 

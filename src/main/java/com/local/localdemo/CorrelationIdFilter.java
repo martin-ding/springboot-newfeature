@@ -11,7 +11,6 @@ import java.util.UUID;
 
 @Component
 public class CorrelationIdFilter implements Filter {
-
     public static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
 
     @Override
@@ -22,24 +21,24 @@ public class CorrelationIdFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
-        // 从请求头中获取 Correlation ID
+        // get Correlation ID from request header
         String correlationId = httpRequest.getHeader(CORRELATION_ID_HEADER);
 
-        // 如果没有，则生成一个新的 UUID
+        // use UUID to generate a new one if no CID found
         if (correlationId == null || correlationId.isEmpty()) {
             correlationId = UUID.randomUUID().toString();
         }
 
-        // 将 Correlation ID 添加到响应头
+        // add CID to response header
         httpResponse.setHeader(CORRELATION_ID_HEADER, correlationId);
 
-        // 将 Correlation ID 放入 MDC 中
+        // put CID to MDC (for logger)
         MDC.put("correlationId", correlationId);
 
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-            // 清理 MDC
+            // clear MDC
             MDC.clear();
         }
     }
